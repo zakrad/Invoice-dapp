@@ -10,14 +10,48 @@ const { Header, Content, Footer } = Layout;
 
 function App() {
   const [invoice, setInvoice] = useState([])
+  const [id, setId] = useState("")
+  const [amount, setAmount] = useState(0)
+  const [address, setAddress] = useState("")
+  const [loading, setLoading] = useState(false)
 
   console.log(invoice)
-  const onChange = (value) => {
-    console.log('changed', value);
+
+  const onChangeId = (e) => {
+    setId(e.target.value);
   };
-  const create = () => {
-    appService.createInvoice()
+
+  const onChangeAmount = (e) => {
+    setAmount(e.target.value);
+  };
+
+  const onChangeAddress = (e) => {
+    setAddress(e.target.value);
+  };
+
+
+  const create = async (amount, address) => {
+    try {
+      setLoading(true)
+      await appService.createInvoice(amount, address)
+    } catch (e) {
+      console.log(e)
+    } finally {
+      setLoading(false);
+    }
   }
+
+  const remove = async (id) => {
+    try {
+      setLoading(true)
+      await appService.deleteInvoice(id)
+    } catch (e) {
+      console.log(e)
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     async function show() {
       try {
@@ -27,7 +61,7 @@ function App() {
       }
     }
     show()
-  }, [])
+  }, [loading])
 
   return (
     <Layout>
@@ -76,57 +110,51 @@ function App() {
                 <span>
                   <Space>
                     <p>BNB Amount:</p>
-                    <InputNumber min={0} max={10} defaultValue={0.1} onChange={onChange} />
+                    <Input onChange={onChangeAmount} value={amount} />
                   </Space>
                 </span>
                 <span>
                   <Space>
                     <p>Address:</p>
-                    <Input placeholder="Receiver" />
+                    <Input onChange={onChangeAddress} placeholder="Receiver" />
                   </Space>
                 </span>
                 <div className="d-flex flex-row-reverse">
-                  <Button className="mt-2" type="primary" onClick={create} >Create</Button>
+                  <Button className="mt-2" type="primary" onClick={async () => { create(amount, address) }} >Create</Button>
                 </div>
               </Card>
               <Card
                 className="m-2"
-                title="Delete Invoice"
+                title="Cancel Invoice"
                 style={{
                   width: 300,
                 }}
               >
                 <span>
                   <Space>
-                    <p>BNB Amount:</p>
-                    <InputNumber min={0} max={10} defaultValue={0.1} onChange={onChange} />
-                  </Space>
-                </span>
-                <span>
-                  <Space>
-                    <p>Address:</p>
-                    <Input placeholder="Receiver" />
+                    <p>Invoice ID:</p>
+                    <Input onChange={onChangeId} value={id} />
                   </Space>
                 </span>
                 <div className="d-flex flex-row-reverse">
-                  <Button className="mt-2" type="primary" onClick={create} >Create</Button>
+                  <Button className="mt-2" type="primary" danger onClick={async () => { remove(id) }} >Delete</Button>
                 </div>
               </Card>
             </Col>
             <Col className="gutter-row d-flex-row" span={18}>
               {invoice.map((invoice, i) => (
-                <Badge.Ribbon text={invoice.status === "success" ? "Already Paid" : "Not paid"} color={invoice.status === "success" ? "green" : "red"}>
-                  <Card
+                <Badge.Ribbon text={invoice.status === "success" ? "Already Paid" : invoice.status === "pending" ? "Not paid" : invoice.status === "cancelled" ? "Invoice Cancelled" : ''} color={invoice.status === "success" ? "green" : invoice.status === "pending" ? "yellow" : invoice.status === "cancelled" ? "red" : ''}>
+                  <Card Card
                     title={`Invoice ID #${invoice.request_id}`}
                     className="m-1"
                   >
                     <p>BNB Amount: {invoice.amount}</p>
                     <p>Receiver: {invoice.invoice_to}</p>
-                    {invoice.status === "success" ? '' : <div className="d-flex flex-row-reverse">
+                    {invoice.status === "pending" ? <div className="d-flex flex-row-reverse">
                       <Button className="mt-2" type="primary" onClick={() => {
                         window.open(invoice.transaction_url, "_blank")
                       }}>Pay</Button>
-                    </div>}
+                    </div> : ''}
                   </Card>
                 </Badge.Ribbon>
               ))}
@@ -134,7 +162,7 @@ function App() {
           </Row>
 
         </div>
-      </Content>
+      </Content >
       <Footer
         style={{
           textAlign: 'center',
@@ -142,7 +170,7 @@ function App() {
       >
         Zakrad | Ethnic Api
       </Footer>
-    </Layout>
+    </Layout >
   );
 }
 
