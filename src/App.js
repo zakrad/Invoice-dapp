@@ -1,7 +1,7 @@
-import { Button, Card, Input, InputNumber, Layout, Menu, Space, Row, Col, Badge } from 'antd';
+import { Button, Card, Input, Layout, Menu, Space, Row, Col, Badge } from 'antd';
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import { AppService } from './services/ethnic.js'
+import { AppService } from './services/thentic.js'
 
 const appService = new AppService()
 
@@ -28,7 +28,6 @@ function App() {
   const onChangeAddress = (e) => {
     setAddress(e.target.value);
   };
-
 
   const create = async (amount, address) => {
     try {
@@ -137,7 +136,7 @@ function App() {
                   </Space>
                 </span>
                 <div className="d-flex flex-row-reverse">
-                  <Button className="mt-2" type="primary" danger onClick={async () => { remove(id) }} >Delete</Button>
+                  <Button className="mt-2" type="primary" danger onClick={async () => { remove(id) }} >Cancel</Button>
                 </div>
               </Card>
             </Col>
@@ -168,7 +167,7 @@ function App() {
           textAlign: 'center',
         }}
       >
-        Zakrad | Ethnic Api
+        Zakrad | Thentic Api
       </Footer>
     </Layout >
   );
